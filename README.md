@@ -7,7 +7,7 @@ Tested with version 3.8.0 of PHPFox.
 ##Features##
 - Auto installation of the module + SQL tables
 - Add a "gmap" component
-- Add a block to look to look for specific people and research per country
+- Add a block to look for specific people and research per country
 - Add a hook to update someone's location automatically as they update their profile info
 - Show a Googlemap with an icon on the map for all your members.
 - Upon clicking on the icon, will show a quick profile of the user, with link to their profile.
