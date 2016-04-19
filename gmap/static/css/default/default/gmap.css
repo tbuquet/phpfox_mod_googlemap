@@ -1,0 +1,29 @@
+#gmap
+{ 
+	height: 600px; 
+	width:100%;
+	margin: 0px; 
+	padding: 0px;
+}
+
+#gmap .user_tooltip_action ul li a, .user_tooltip_action ul li a:hover
+{
+	background-color:white;
+}
+
+#gmap .user_tooltip_action ul li a:hover
+{
+	background-color:#cccccc;
+}
+
+#gmap .user_tooltip_info
+{
+	color:#6495ED
+}
+
+.tag_cloud ul li a, .tag_cloud ul li a:hover
+{
+	margin-top:2px;
+	margin-bottom:2px;
+	line-height:18px;
+}
