@@ -1,5 +1,14 @@
 <?php
 defined('PHPFOX') or exit('NO DICE!');
+
+/**
+* Service class for gmap
+*
+* @package	gmap
+* @author	Thibault Buquet
+* @link		https://github.com/tbuquet/phpfox_mod_googlemap/
+* @version	1.0
+*/
 class Gmap_Service_Gmap extends Phpfox_Service 
 {	
 	protected $oGoogleMapService = null;
@@ -11,11 +20,20 @@ class Gmap_Service_Gmap extends Phpfox_Service
 	{
 	}
 	
+	/**
+	* Validate a few cases and requests the googlemap API to obtain the lat/lng of a user address and store it in the gmap SQL table as well as in cache
+	*
+	* @param userid			$iUserId 		User ID
+	* @param countryiso		$sCountryIso	ISO code for the user country
+	* @param city			$sCity			City of the user
+	* @param postalcode		$sPostalCode	Postal Code of the user
+	*
+	*/
 	public function refreshUserGeolocation($iUserId, $sCountryIso, $sCity, $sPostalCode)
 	{
 		$aUserRow = $this->getUserAddress($iUserId);
 		
-		//Not found
+		//Address Not found
 		if($aUserRow == null || !isset($sCity) || $sCity == '')
 		{
 			$this->database()->delete(Phpfox::getT('gmap'), 'user_id = \'' . $iUserId . '\'');
@@ -24,7 +42,7 @@ class Gmap_Service_Gmap extends Phpfox_Service
 			return;
 		}
 
-		//Found
+		//Address Found
 		//Get Country
 		$aCountry = $this->database()->select('c.name as country')
 			->from(Phpfox::getT('country'), 'c')		
@@ -107,6 +125,12 @@ class Gmap_Service_Gmap extends Phpfox_Service
 		}
 	}
 	
+	
+	/**
+	* Create a list of all the user locations and sort them by countries
+	*
+	* @return $aOutput	List of all the user locations, sorted by country
+	*/
 	public function getAllLocations()
 	{
 		$sCacheId = $this->cache()->set('gmap.locations');
@@ -132,6 +156,11 @@ class Gmap_Service_Gmap extends Phpfox_Service
 		return $aOutput;
 	}
 	
+	/**
+	* Create a list of all the countries of the user in the databse
+	*
+	* @return $aRows	List of all the user countries, sorted alphabetically
+	*/
 	public function getAllCountriesLocations()
 	{
 		$sCacheId = $this->cache()->set('gmap.countries');
@@ -160,32 +189,44 @@ class Gmap_Service_Gmap extends Phpfox_Service
 				}
 			}
 			
-			$aRows = $this->sortByProp($aRows, 'name');
+			$aRows = $this->sortByProperty($aRows, 'name');
 		}
 		
 		return $aRows;
 	}
 	
-	public function sortByProp($array, $propName, $reverse = false)
+	/**
+	* Sort an array of objects by a specific property of these objects
+	*
+	* @param array			$array 			Array to sort
+	* @param propertyName	$propertyName 	Name of the property to use as a comparator
+	*
+	* @return $result	$array sorted by $propertyName
+	*/
+	public function sortByProp($array, $propertyName)
 	{
 		$sorted = [];
 
 		foreach ($array as $item)
-		{
-			$sorted[$item[$propName]][] = $item;
-		}
+			$sorted[$item[$propertyName]][] = $item;
 
-		if ($reverse) krsort($sorted); else ksort($sorted);
+		ksort($sorted);
 		$result = [];
 
-		foreach ($sorted as $subArray) foreach ($subArray as $item)
-		{
-			$result[] = $item;
-		}
+		foreach ($sorted as $subArray) 
+			foreach ($subArray as $item)
+				$result[] = $item;
 
 		return $result;
 	}
 	
+	/**
+	* Get a country localisation
+	*
+	* @param countryIso			$countryIso 			ISO code for the country
+	*
+	* @return $aRows	An array of the property of a country (name, lat/lng...)
+	*/
 	public function getCountryLocalisation($countryIso)
 	{
 		$aRows = $this->database()->select('c.country_iso, c.name, fc.*')
@@ -197,6 +238,13 @@ class Gmap_Service_Gmap extends Phpfox_Service
 		return $aRows;
 	}
 	
+	/**
+	* Get a user full address from the Phpfox user fields
+	*
+	* @param userID		$iUserId 		User ID
+	*
+	* @return $aRow		An array containing the name, country, city, postal code and country iso of a user
+	*/
 	public function getUserAddress($iUserId)
 	{
 		$aRow = $this->database()->select('u.user_id, c.name as country, uf.city_location as city, uf.postal_code, c.country_iso')
@@ -205,7 +253,8 @@ class Gmap_Service_Gmap extends Phpfox_Service
 			->join(Phpfox::getT('country'), 'c', 'c.country_iso = u.country_iso')
 			->where('u.user_id = \'' . $iUserId . '\'')
 			->execute('getSlaveRow');
-			
+		
+		//Making sure the information isnt private or limited to friends.
 		$aFiltersOut = $this->database()->select('u.user_id')
 			->from(Phpfox::getT('user'), 'u')		
 			->join(Phpfox::getT('user_privacy'), 'up', 'up.user_id = u.user_id')		
@@ -226,6 +275,11 @@ class Gmap_Service_Gmap extends Phpfox_Service
 			return $aRow;
 	}
 	
+	/**
+	* Instanciate a googlemap map, configure it and generate its client side code.
+	*
+	* @param defaultUser		$defaultUser 		Username, user to zoom on the user at the start of the map
+	*/
 	public function generateGoogleMap($defaultUser = '')
 	{
 		if(!isset($oGoogleMapService))
@@ -263,6 +317,9 @@ class Gmap_Service_Gmap extends Phpfox_Service
 		$oGoogleMapService->generate();
 	}
 	
+	/**
+	* Generate the JS code of the map
+	*/
 	public function getGoogleMapJS()
 	{
 		if(!isset($oGoogleMapService))

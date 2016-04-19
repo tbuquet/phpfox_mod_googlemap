@@ -1,5 +1,13 @@
 <?php 
-defined('PHPFOX') or exit('NO DICE!'); 
+defined('PHPFOX') or exit('NO DICE!');
+/**
+* Template class for block "Filter"
+*
+* @package	gmap
+* @author	Thibault Buquet
+* @link		https://github.com/tbuquet/phpfox_mod_googlemap/
+* @version	1.0
+*/ 
 ?>
 <div class="block">
 	<div class="global_apps_title title">{phrase var='gmap.search'} ({$iTotalPeople} people)</div>

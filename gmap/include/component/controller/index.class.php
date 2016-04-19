@@ -1,10 +1,19 @@
 <?php
 defined('PHPFOX') or exit('NO DICE!');
+
+/**
+* Controller class for gmap
+*
+* @package	gmap
+* @author	Thibault Buquet
+* @link		https://github.com/tbuquet/phpfox_mod_googlemap/
+* @version	1.0
+*/
 class Gmap_Component_Controller_Index extends Phpfox_Component
 {
 	/**
-	 * Class process method wnich is used to execute this component.
-	 */
+	* Load the required information for the page "gmap"
+	*/
 	public function process()
 	{
 		Phpfox::isUser(true);
@@ -22,8 +31,7 @@ class Gmap_Component_Controller_Index extends Phpfox_Component
 	}
 	
 	/**
-	 * Garbage collector. Is executed after this class has completed
-	 * its job and the template has also been displayed.
+	 * Garbage collector.
 	 */
 	public function clean()
 	{
